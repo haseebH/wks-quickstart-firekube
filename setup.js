@@ -2,10 +2,11 @@ import * as param from '@jkcfg/std/param'
 import * as std from '@jkcfg/std'
 
 const config = param.all();
+console.log(config);
 let output = [];
 
 const numNodes = config => config.controlPlane.nodes + config.workers.nodes;
-
+console.log(numNodes);
 const backend = {
   docker: {
     image: 'quay.io/footloose/centos7:0.6.0',
@@ -30,14 +31,14 @@ const volumes = config => backend[config.backend].volumes;
 
 const footloose = config => ({
   cluster: {
-    name: 'firekube',
-    privateKey: 'cluster-key',
+    name: 'firekube2',
+    privateKey: 'cluster-key2',
   },
   machines: [{
     count: numNodes(config),
     spec: {
       image: image(config),
-      name: 'node%d',
+      name: 'cdnode%d',
       backend: config.backend,
       ignite: {
         cpus: 2,
@@ -47,16 +48,16 @@ const footloose = config => ({
       },
       portMappings: [{
         containerPort: 22,
-        hostPort: 2222,
+        hostPort: 2232,
       }, {
         containerPort: 6443,
-        hostPort: 6443,
+        hostPort: 6452,
       }, {
         containerPort: 30443,
-        hostPort: 30443,
+        hostPort: 30452,
       }, {
         containerPort: 30080,
-        hostPort: 30080,
+        hostPort: 30102,
       }],
       privileged: privileged(config),
       volumes: volumes(config),

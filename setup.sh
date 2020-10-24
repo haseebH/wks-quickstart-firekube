@@ -44,13 +44,7 @@ do_footloose() {
     fi
 }
 
-if git_current_branch > /dev/null 2>&1; then
-    log "Using git branch: $(git_current_branch)"
-else
-    error "Please checkout a git branch."
-fi
 
-git_remote="$(git config --get "branch.$(git_current_branch).remote" || true)" # fallback to "", user may override
 git_deploy_key=""
 download="yes"
 download_force="no"
@@ -101,20 +95,6 @@ while test $# -gt 0; do
     shift
 done
 
-if [ "${git_remote}" ]; then
-    log "Using git remote: ${git_remote}"
-else
-    error "
-Please configure a remote for your current branch:
-    git branch --set-upstream-to <remote_name>/$(git_current_branch)
-
-Or use the --git-remote flag:
-    ./setup.sh --git-remote <remote_name>
-
-Your repo has the following remotes:
-$(git remote -v)"
-fi
-echo
 
 if [ "${download}" == "yes" ]; then
     mkdir -p "${HOME}/.wks/bin"
@@ -137,7 +117,7 @@ check_version wksctl "${WKSCTL_VERSION}"
 log "Creating footloose manifest"
 jk generate -f config.yaml setup.js
 
-cluster_key="cluster-key"
+cluster_key="cluster-key2"
 if [ ! -f "${cluster_key}" ]; then
     # Create the cluster ssh key with the user credentials.
     log "Creating SSH key"
@@ -154,19 +134,21 @@ jk generate -f config.yaml -f "${status}" setup.js
 rm -f "${status}"
 
 log "Updating container images and git parameters"
-wksctl init --git-url="$(git_http_url "$(git_remote_fetchurl "${git_remote}")")" --git-branch="$(git_current_branch)"
+#wksctl init --git-url="$(git_http_url "$(git_remote_fetchurl "${git_remote}")")" --git-branch="$(git_current_branch)"
 
 log "Pushing initial cluster configuration"
-git add config.yaml footloose.yaml machines.yaml flux.yaml wks-controller.yaml
+#git add config.yaml footloose.yaml machines.yaml flux.yaml wks-controller.yaml
 
-git diff-index --quiet HEAD || git commit -m "Initial cluster configuration"
-git push "${git_remote}" HEAD
+#git diff-index --quiet HEAD || git commit -m "Initial cluster configuration"
+#git push "${git_remote}" HEAD
 
 log "Installing Kubernetes cluster"
-apply_args=(
-  "--git-url=$(git_http_url "$(git_remote_fetchurl "${git_remote}")")"
-  "--git-branch=$(git_current_branch)"
-)
-[ "${git_deploy_key}" ] && apply_args+=("${git_deploy_key}")
-wksctl apply "${apply_args[@]}"
-wksctl kubeconfig
+#apply_args=(
+#  "--git-url=$(git_http_url "$(git_remote_fetchurl "${git_remote}")")"
+#  "--git-branch=$(git_current_branch)"
+#)
+#[ "${git_deploy_key}" ] && apply_args+=("${git_deploy_key}")
+#log "${apply_args[@]}"
+#wksctl apply "${apply_args[@]}"
+wksctl apply config.yaml machines.yaml flux.yaml wks-controller.yaml  --ssh-key ${cluster_key}
+wksctl kubeconfig   --ssh-key ${cluster_key}

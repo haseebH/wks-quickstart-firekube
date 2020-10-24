@@ -1,6 +1,6 @@
 cluster:
-  name: firekube
-  privateKey: cluster-key
+  name: firekube2
+  privateKey: cluster-key2
 machines:
 - count: 3
   spec:
@@ -11,15 +11,15 @@ machines:
       kernel: weaveworks/ignite-kernel:4.19.47
       memory: 1GB
     image: weaveworks/ignite-centos:firekube-pre3
-    name: node%d
+    name: cdnode%d
     portMappings:
     - containerPort: 22
-      hostPort: 2222
+      hostPort: 2232
     - containerPort: 6443
-      hostPort: 6443
+      hostPort: 6452
     - containerPort: 30443
-      hostPort: 30443
+      hostPort: 30452
     - containerPort: 30080
-      hostPort: 30080
+      hostPort: 30102
     privileged: false
     volumes: []
